@@ -94,16 +94,58 @@ let logoData='';
 
 function escapeXml(s){return String(s).replace(/[<>&'\"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;',"'":'&apos;','\"':'&quot;'}[c]));}
 function wrap(text,maxChars=34){const words=String(text).trim().split(/\s+/);const lines=[];let line='';for(const word of words){if((line+' '+word).trim().length<=maxChars)line=(line+' '+word).trim();else{if(line)lines.push(line);line=word}}if(line)lines.push(line);return lines.length?lines:['İtiraf metni burada önizlenir.'];}
-function wrapText(text,maxChars) {
-  const words=text.trim().split(/\\s+/).filter(Boolean);
-  const lines=[]; let line='';
-  for(const word of words){
-    const test=line ? line+' '+word : word;
-    if(test.length<=maxChars) line=test;
-    else { if(line) lines.push(line); line=word; }
+function wrapText(text,maxWidth,fontSize,maxLines=13){
+  const canvas=document.createElement('canvas');
+  const ctx=canvas.getContext('2d');
+  ctx.font=`700 ${fontSize}px Arial, sans-serif`;
+
+  const source=String(text||'').replace(/\r/g,'').trim();
+  if(!source) return [''];
+
+  const paragraphs=source.split(/\n+/);
+  const lines=[];
+
+  for(const paragraph of paragraphs){
+    const words=paragraph.split(/\s+/).filter(Boolean);
+    let line='';
+
+    for(const word of words){
+      const candidate=line ? `${line} ${word}` : word;
+
+      if(ctx.measureText(candidate).width <= maxWidth){
+        line=candidate;
+        continue;
+      }
+
+      if(line) lines.push(line);
+
+      // A single very long word is split character-by-character so it
+      // can never escape the confession box.
+      let chunk='';
+      for(const ch of word){
+        const test=chunk+ch;
+        if(ctx.measureText(test).width <= maxWidth){
+          chunk=test;
+        }else{
+          if(chunk) lines.push(chunk);
+          chunk=ch;
+        }
+      }
+      line=chunk;
+    }
+
+    if(line) lines.push(line);
   }
-  if(line) lines.push(line);
-  return lines.length ? lines : [''];
+
+  if(lines.length<=maxLines) return lines;
+
+  const visible=lines.slice(0,maxLines);
+  let last=visible[maxLines-1];
+  while(last.length>1 && ctx.measureText(last+'…').width>maxWidth){
+    last=last.slice(0,-1);
+  }
+  visible[maxLines-1]=last+'…';
+  return visible;
 }
 function escapeXml(s) {
   return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[m]));
@@ -119,53 +161,102 @@ function makeSvg(){
   const cleanName=(usernameEl.value||'').trim().replace(/^@/,'');
   const displayName=named ? ('@'+(cleanName||'kullaniciadi')) : 'ANONİM';
 
-  // The supplied master image is kept intact. Only the requested dynamic fields are added.
-  const quoteLines=wrapText(raw || 'İtiraf metni burada görünecek.', 42);
-  const quoteFont=43;
-  const quoteGap=58;
-  const quoteStart=760-(quoteLines.length-1)*quoteGap/2;
+  /*
+    The supplied master image remains the only visual template.
+    Dynamic content is limited to:
+      1) the number after the fixed "İTİRAF #"
+      2) confession text
+      3) identity icon + identity text
+  */
 
-  // The master already contains the fixed "İTİRAF #" artwork.
-  // Only the number is rendered after the existing #, using the same brush-style family.
-  const numberX=636;
+  // The confession area is bounded to the actual inner box.
+  // Text is measured against the SVG width and long words are split too.
+  const maxTextWidth=790;
+  let quoteFont=43;
+  let quoteLines=wrapText(raw || 'İtiraf metni burada görünecek.', maxTextWidth, quoteFont, 13);
+
+  // Reduce the dynamic font only when the entered text requires more lines.
+  // This keeps every line inside the fixed confession area.
+  if(quoteLines.length>8){
+    quoteFont=34;
+    quoteLines=wrapText(raw || 'İtiraf metni burada görünecek.', maxTextWidth, quoteFont, 13);
+  }
+  if(quoteLines.length>11){
+    quoteFont=29;
+    quoteLines=wrapText(raw || 'İtiraf metni burada görünecek.', maxTextWidth, quoteFont, 13);
+  }
+
+  const quoteGap=Math.max(34, Math.round(quoteFont*1.22));
+  const dividerY=1060;
+  const textTop=555;
+  const textBottom=1015;
+  const totalHeight=(quoteLines.length-1)*quoteGap;
+  const quoteStart=Math.max(textTop, Math.min(
+    textBottom-totalHeight,
+    ((textTop+textBottom)/2)-(totalHeight/2)
+  ));
+
+  /*
+    The master artwork already contains "İTİRAF #".
+    The number is placed directly after the # and uses an embedded
+    brush-style font so it is independent of the user's device fonts.
+  */
+  const numberX=632;
   const numberY=405;
 
-  // Cover only the fixed identity placeholder area, then draw the identity as one centered SVG group.
+  /*
+    Completely cover the master identity placeholder, including its original
+    icon/text, then render one centered SVG group. This removes the artifact
+    visible underneath ANONİM/user name.
+  */
+  const metaCenterX=543;
+  const metaCenterY=1128;
   const metaFont=30;
-  const metaApproxWidth=Math.min(360, Math.max(170, displayName.length*18 + 58));
-  const metaLeft=540 - metaApproxWidth/2;
-  const metaIconSize=48;
-  const metaIconX=metaLeft;
-  const metaIconY=1098;
-  const metaTextX=metaIconX + metaIconSize + 14;
-  const metaTextY=1134;
+  const iconR=23;
+  const iconGap=14;
+
+  // Approximate text width for centering the icon + text as one unit.
+  const textWidth=Math.max(70, displayName.length*17);
+  const groupWidth=iconR*2 + iconGap + textWidth;
+  const groupLeft=metaCenterX-groupWidth/2;
+  const iconCx=groupLeft+iconR;
+  const iconCy=metaCenterY;
+  const textX=iconCx+iconR+iconGap;
+  const textY=metaCenterY+10;
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
     <defs>
       <style>
+        ${font_face}
         .dynamicQuote{font-family:Arial,sans-serif;font-weight:700;fill:#fff;text-anchor:middle}
         .dynamicMeta{font-family:Arial,sans-serif;font-weight:400;font-style:italic;fill:#fff}
-        .dynamicNumber{font-family:"Brush Script MT","Segoe Print","URW Chancery L",cursive;font-weight:700;font-style:italic;fill:#fff;letter-spacing:1px}
-        .metaIcon{fill:none;stroke:#ef111b;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+        .dynamicNumber{font-family:'TemplateBrush',cursive;font-weight:400;font-style:normal;fill:#fff}
+        .metaIcon{fill:none;stroke:#ef111b;stroke-width:2.8;stroke-linecap:round;stroke-linejoin:round}
       </style>
+      <clipPath id="confessionClip">
+        <rect x="145" y="520" width="796" height="515" rx="8"/>
+      </clipPath>
     </defs>
 
     <image href="${TEMPLATE_DATA}" x="0" y="0" width="${W}" height="${H}" preserveAspectRatio="none"/>
 
-    <!-- Only the number is dynamic; the fixed "İTİRAF #" remains part of the master template. -->
-    <text x="${numberX}" y="${numberY}" class="dynamicNumber" font-size="67">${escapeXml(num)}</text>
+    <!-- Dynamic number only. The fixed "İTİRAF #" remains untouched. -->
+    <text x="${numberX}" y="${numberY}" class="dynamicNumber" font-size="62">${escapeXml(num)}</text>
 
-    <!-- Dynamic confession text. -->
-    ${quoteLines.map((line,i)=>`<text x="543" y="${quoteStart+i*quoteGap-2}" class="dynamicQuote" font-size="${quoteFont}">${escapeXml(line)}</text>`).join('')}
+    <!-- Dynamic confession text, clipped to the fixed confession area. -->
+    <g clip-path="url(#confessionClip)">
+      ${quoteLines.map((line,i)=>`<text x="543" y="${quoteStart+i*quoteGap}" class="dynamicQuote" font-size="${quoteFont}">${escapeXml(line)}</text>`).join('')}
+    </g>
 
-    <!-- Hide the template placeholder and replace it with the system-generated identity. -->
-    <rect x="300" y="1085" width="480" height="88" rx="12" fill="#030303" fill-opacity=".96"/>
+    <!-- Remove the complete fixed identity placeholder before rendering the dynamic identity. -->
+    <rect x="250" y="1070" width="590" height="125" rx="10" fill="#030303"/>
 
+    <!-- Centered identity group: icon + ANONİM / @username. -->
     <g aria-label="${escapeXml(displayName)}">
-      <circle cx="${metaIconX + metaIconSize/2}" cy="${metaIconY + metaIconSize/2}" r="22" class="metaIcon"/>
-      <circle cx="${metaIconX + metaIconSize/2}" cy="${metaIconY + 17}" r="7" class="metaIcon"/>
-      <path d="M${metaIconX + 10} ${metaIconY + 41}c0-10 7-16 14-16s14 6 14 16" class="metaIcon"/>
-      <text x="${metaTextX}" y="${metaTextY}" class="dynamicMeta" font-size="${metaFont}">${escapeXml(displayName)}</text>
+      <circle cx="${iconCx}" cy="${iconCy}" r="${iconR}" class="metaIcon"/>
+      <circle cx="${iconCx}" cy="${iconCy-7}" r="7.5" class="metaIcon"/>
+      <path d="M${iconCx-14} ${iconCy+16}c0-10 6-16 14-16s14 6 14 16" class="metaIcon"/>
+      <text x="${textX}" y="${textY}" class="dynamicMeta" font-size="${metaFont}">${escapeXml(displayName)}</text>
     </g>
   </svg>`;
 }
