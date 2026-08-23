@@ -227,7 +227,7 @@ function makeSvg(){
      İkon + isim tek grup olarak tam ortalanır.
      ----------------------------------------------------------- */
   const metaCenterX=543;
-  const metaCenterY=1142;
+  const metaCenterY=1147;
   const metaFont=30;
   const iconR=27;
   const iconGap=14;
@@ -260,13 +260,13 @@ function makeSvg(){
         }
         .dynamicMeta{
           font-family:Arial,sans-serif;
-          font-weight:400;
-          font-style:italic;
+          font-weight:700;
+          font-style:normal;
           fill:#fff
         }
         .dynamicNumber{
           font-family:'LeviBrush',sans-serif;
-          font-weight:400;
+          font-weight:700;
           font-style:normal;
           fill:#fff
         }
@@ -291,6 +291,7 @@ function makeSvg(){
     <text x="${numberX}" y="${numberY}"
           class="dynamicNumber"
           font-size="${numberFontSize}"
+          font-weight="700"
           text-anchor="start">${escapeXml(num)}</text>
 
     <!-- Yalnızca itiraf metni dinamik olarak eklenir. -->
