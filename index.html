@@ -125,69 +125,158 @@ function buildSVG(){
  const isUser=document.querySelector('input[name="visibility"]:checked').value==="user";
  const rawName=$("username").value.trim().replace(/^@/,"");
  const name=isUser && rawName ? rawName : "ANONİM";
- const lines=wrapText(txt,38);
- const start=660-(lines.length-1)*29;
+ const lines=wrapText(txt,34);
+ const lineH=58;
+ const totalH=lines.length*lineH;
+ const startY=735-totalH/2+46;
  const logo=LOGO;
+
  return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1080" height="1440" viewBox="0 0 1080 1440">
  <defs>
-  <radialGradient id="bg"><stop offset="0" stop-color="#260306"/><stop offset=".55" stop-color="#090102"/><stop offset="1" stop-color="#020202"/></radialGradient>
-  <linearGradient id="red" x1="0" x2="1"><stop stop-color="#a50008"/><stop offset=".5" stop-color="#ff2027"/><stop offset="1" stop-color="#9d0007"/></linearGradient>
-  <filter id="glow"><feGaussianBlur stdDeviation="7" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-  <pattern id="grid" width="38" height="38" patternUnits="userSpaceOnUse"><path d="M38 0H0V38" fill="none" stroke="#ff1820" stroke-opacity=".045"/></pattern>
-  <filter id="shadow"><feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000" flood-opacity=".85"/></filter>
+  <radialGradient id="bg" cx="50%" cy="38%" r="78%">
+   <stop offset="0" stop-color="#170205"/><stop offset=".48" stop-color="#060102"/><stop offset="1" stop-color="#000"/>
+  </radialGradient>
+  <linearGradient id="red" x1="0" y1="0" x2="1" y2="0">
+   <stop stop-color="#760006"/><stop offset=".18" stop-color="#e30b13"/><stop offset=".5" stop-color="#ff1a21"/><stop offset=".82" stop-color="#e30b13"/><stop offset="1" stop-color="#700006"/>
+  </linearGradient>
+  <linearGradient id="edge" x1="0" y1="0" x2="0" y2="1">
+   <stop stop-color="#ff4a4f"/><stop offset=".45" stop-color="#ff1018"/><stop offset="1" stop-color="#650005"/>
+  </linearGradient>
+  <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+   <feGaussianBlur stdDeviation="8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+  <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+   <feGaussianBlur stdDeviation="20"/>
+  </filter>
+  <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+   <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#000" flood-opacity=".9"/>
+  </filter>
+  <pattern id="fineGrid" width="34" height="34" patternUnits="userSpaceOnUse">
+   <path d="M34 0H0V34" fill="none" stroke="#ff1a22" stroke-opacity=".045" stroke-width="1"/>
+  </pattern>
+  <pattern id="cracks" width="180" height="160" patternUnits="userSpaceOnUse">
+   <path d="M8 120L36 96L42 60L70 42M36 96L18 70M42 60L82 74L112 52L148 60M70 42L90 18M112 52L126 30M82 74L98 106L132 124M148 60L166 38"
+     fill="none" stroke="#8d080e" stroke-opacity=".28" stroke-width="2"/>
+   <path d="M8 120L36 96L42 60M112 52L148 60M82 74L132 124"
+     fill="none" stroke="#ff1b23" stroke-opacity=".12" stroke-width="1"/>
+  </pattern>
+  <clipPath id="quoteClip"><rect x="118" y="500" width="844" height="650" rx="34"/></clipPath>
  </defs>
- <rect width="1080" height="1440" fill="#020202"/>
+
+ <!-- BLACK / RED ATMOSPHERIC BACKGROUND -->
+ <rect width="1080" height="1440" fill="#000"/>
  <rect width="1080" height="1440" fill="url(#bg)"/>
- <rect width="1080" height="1440" fill="url(#grid)"/>
- <g opacity=".22" filter="url(#glow)">
-   <circle cx="145" cy="420" r="170" fill="none" stroke="#ff1119" stroke-width="55"/>
-   <circle cx="930" cy="440" r="160" fill="none" stroke="#ff1119" stroke-width="48"/>
+ <ellipse cx="540" cy="690" rx="505" ry="575" fill="#5d0007" opacity=".12" filter="url(#softGlow)"/>
+ <rect width="1080" height="1440" fill="url(#fineGrid)"/>
+ <rect width="1080" height="1440" fill="url(#cracks)" opacity=".85"/>
+
+ <!-- SUBTLE RED LIGHT / CRACKLE AROUND THE MAIN CARD -->
+ <path d="M45 475C115 430 140 400 185 355M38 820C95 770 116 725 150 690M1040 450C980 420 954 382 920 340M1040 850C990 810 972 760 936 710"
+       fill="none" stroke="#e10b14" stroke-opacity=".22" stroke-width="18" filter="url(#softGlow)"/>
+
+ <!-- TOP SLOGANS -->
+ <g font-family="Arial,sans-serif" font-style="italic" font-weight="900">
+   <text x="112" y="155" fill="#f5f5f5" font-size="33">İTİRAF ET,</text>
+   <text x="103" y="198" fill="#ff1a22" font-size="35">İÇİN RAHATLASIN.</text>
+   <path d="M102 216C170 232 253 232 326 207" fill="none" stroke="#ff1820" stroke-width="5"/>
+
+   <text x="968" y="155" text-anchor="end" fill="#f5f5f5" font-size="33">KORKMA,</text>
+   <text x="977" y="198" text-anchor="end" fill="#ff1a22" font-size="35">RAHATÇA YAZ.</text>
+   <path d="M755 216C827 232 910 232 978 207" fill="none" stroke="#ff1820" stroke-width="5"/>
  </g>
- <g font-family="Arial, sans-serif" font-style="italic" font-weight="800">
-   <text x="130" y="175" fill="#f2f2f2" font-size="34">İTİRAF ET,</text>
-   <text x="112" y="218" fill="#ff1820" font-size="36">İÇİN RAHATLASIN.</text>
-   <path d="M108 235 Q225 250 330 226" fill="none" stroke="#ff1820" stroke-width="5"/>
-   <text x="805" y="175" fill="#f2f2f2" font-size="34">KORKMA,</text>
-   <text x="760" y="218" fill="#ff1820" font-size="36">RAHATÇA YAZ.</text>
-   <path d="M758 235 Q890 249 980 224" fill="none" stroke="#ff1820" stroke-width="5"/>
- </g>
- <image href="${logo}" x="355" y="48" width="370" height="370" preserveAspectRatio="xMidYMid meet"/>
+
+ <!-- EXACT EMBEDDED PNG LOGO; NO MODIFICATION -->
+ <image href="${logo}" x="360" y="18" width="360" height="360" preserveAspectRatio="xMidYMid meet"/>
+
+ <!-- PAINT-STROKE TITLE -->
  <g filter="url(#shadow)">
-   <path d="M150 382 L930 382 L1000 430 L930 478 L150 478 L80 430 Z" fill="url(#red)"/>
-   <text x="540" y="449" text-anchor="middle" fill="#fff" font-family="Arial, sans-serif" font-size="48" font-weight="900" letter-spacing="3">📣 İTİRAF #${esc(num)}</text>
+   <path d="M108 390
+            L155 377 L214 382 L275 375 L337 383 L399 377 L463 383 L527 375 L592 382 L653 376
+            L717 383 L780 376 L843 382 L902 377 L972 392
+            L949 415 L970 438 L914 450 L852 444 L790 452 L726 445 L664 451 L602 444 L539 452
+            L475 445 L412 451 L348 444 L286 451 L223 444 L163 451 L108 431 L128 412 Z"
+         fill="url(#red)"/>
+   <path d="M140 391C255 409 367 386 480 399C596 412 704 385 825 400C881 407 928 395 954 403"
+         fill="none" stroke="#ff5559" stroke-opacity=".45" stroke-width="4"/>
+   <path d="M143 441C260 425 354 444 468 431C585 418 699 442 820 429C880 423 921 438 950 426"
+         fill="none" stroke="#760006" stroke-opacity=".75" stroke-width="5"/>
  </g>
+
+ <!-- MEGAPHONE ICON -->
+ <g transform="translate(318 399)" stroke="#fff" stroke-width="5" fill="none">
+   <path d="M0 22L35 5L60 10L50 50L25 55L0 38Z"/>
+   <path d="M25 55L19 70L31 73L40 53"/>
+   <path d="M60 10L79 0M61 23L84 20M58 37L78 45"/>
+ </g>
+ <text x="574" y="434" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="47" font-weight="900" letter-spacing="2">İTİRAF #${esc(num)}</text>
+
+ <!-- MAIN QUOTE CARD -->
  <g filter="url(#glow)">
-   <rect x="92" y="465" width="896" height="650" rx="34" fill="#050608" stroke="#ff2028" stroke-width="3"/>
-   <rect x="98" y="471" width="884" height="638" rx="29" fill="none" stroke="#6b0a0e" stroke-width="1"/>
+   <rect x="112" y="478" width="856" height="674" rx="36" fill="#030406" stroke="#ff1b22" stroke-width="3"/>
+   <rect x="118" y="484" width="844" height="662" rx="31" fill="none" stroke="#5e080d" stroke-width="2"/>
  </g>
- <text x="145" y="565" fill="#ff171f" font-family="Georgia,serif" font-size="100">“</text>
- <g font-family="Arial, sans-serif" fill="#f5f5f5">${textSvg(lines,540,start,40,700)}</g>
- <text x="925" y="1010" fill="#ff171f" font-family="Georgia,serif" font-size="100">”</text>
- <line x1="150" y1="1018" x2="930" y2="1018" stroke="#ff2028" stroke-width="2" stroke-dasharray="10 12"/>
- <circle cx="540" cy="1018" r="9" fill="#ff2028" filter="url(#glow)"/>
- <g transform="translate(410 1055)">
-   <circle cx="55" cy="42" r="37" fill="none" stroke="#ff1820" stroke-width="3"/>
-   <circle cx="55" cy="31" r="11" fill="none" stroke="#ff1820" stroke-width="3"/>
-   <path d="M34 61 Q55 42 76 61" fill="none" stroke="#ff1820" stroke-width="3"/>
-   <text x="108" y="45" fill="#fff" font-family="Arial,sans-serif" font-size="31" font-weight="800">${esc(name)}</text>
+ <g clip-path="url(#quoteClip)">
+   <circle cx="540" cy="810" r="205" fill="none" stroke="#2d2f32" stroke-opacity=".17" stroke-width="38"/>
+   <circle cx="540" cy="810" r="150" fill="none" stroke="#121417" stroke-opacity=".6" stroke-width="18"/>
  </g>
+
+ <!-- QUOTATION MARKS -->
+ <text x="153" y="612" fill="#ff151d" font-family="Georgia,serif" font-size="116" font-weight="700">“</text>
+ <text x="906" y="1065" fill="#ff151d" font-family="Georgia,serif" font-size="116" font-weight="700">”</text>
+
+ <!-- DYNAMIC CONFESSION TEXT -->
+ <g font-family="Arial,sans-serif" fill="#f4f4f4" font-weight="700" font-size="43">
+   ${textSvg(lines,540,startY,43,700)}
+ </g>
+
+ <!-- DIVIDER -->
+ <line x1="154" y1="1004" x2="926" y2="1004" stroke="#e5161d" stroke-width="2" stroke-dasharray="8 10"/>
+ <circle cx="540" cy="1004" r="9" fill="#ff1820" filter="url(#glow)"/>
+
+ <!-- AUTHOR / VISIBILITY -->
+ <g transform="translate(425 1029)">
+   <circle cx="45" cy="45" r="37" fill="none" stroke="#ff1820" stroke-width="3"/>
+   <circle cx="45" cy="34" r="11" fill="none" stroke="#ff1820" stroke-width="3"/>
+   <path d="M24 65Q45 46 66 65" fill="none" stroke="#ff1820" stroke-width="3"/>
+   <text x="92" y="56" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="30" font-style="italic" font-weight="800">${esc(name)}</text>
+ </g>
+
+ <!-- LOWER CTA ROW -->
  <g font-family="Arial,sans-serif" font-style="italic" font-weight="800">
-   <circle cx="122" cy="1235" r="40" fill="#050505" stroke="#fff" stroke-width="2"/>
-   <path d="M99 1238 L139 1217 L124 1260 L117 1244 Z" fill="none" stroke="#ff1820" stroke-width="5"/>
-   <text x="185" y="1227" fill="#fff" font-size="24">İTİRAF İÇİN</text>
-   <text x="185" y="1260" fill="#ff1820" font-size="26">DM'DEN YAZ</text>
-   <line x1="370" y1="1200" x2="370" y2="1280" stroke="#666"/>
-   <text x="410" y="1227" fill="#fff" font-size="24">İTİRAF GÖNDERMEK İÇİN</text>
-   <text x="410" y="1260" fill="#ff1820" font-size="26">BİO'DAKİ LİNKE TIKLA!</text>
-   <path d="M790 1205 L995 1190 L970 1280 L760 1292 Z" fill="url(#red)"/>
-   <text x="875" y="1238" text-anchor="middle" fill="#fff" font-size="20">🔒 KURALLARIMIZI</text>
-   <text x="875" y="1265" text-anchor="middle" fill="#fff" font-size="20">OKUMAYI UNUTMA!</text>
+   <!-- paper plane -->
+   <circle cx="118" cy="1227" r="42" fill="#050505" stroke="#fff" stroke-width="2"/>
+   <path d="M91 1229L145 1207L124 1254L116 1236L91 1229ZM116 1236L145 1207" fill="none" stroke="#ff1820" stroke-width="4"/>
+   <text x="173" y="1218" fill="#fff" font-size="23">İTİRAFINI GÖNDER</text>
+   <text x="173" y="1250" fill="#ff1820" font-size="24">BİZ PAYLAŞALIM.</text>
+
+   <!-- separator -->
+   <line x1="388" y1="1192" x2="388" y2="1266" stroke="#777" stroke-width="2"/>
+
+   <!-- envelope -->
+   <g transform="translate(425 1200)">
+     <rect x="0" y="0" width="66" height="52" rx="4" fill="none" stroke="#fff" stroke-width="3"/>
+     <path d="M3 5L33 30L63 5M3 49L25 28M63 49L41 28" fill="none" stroke="#fff" stroke-width="3"/>
+     <path d="M23 28C28 18 39 18 44 28C44 37 33 43 33 43C33 43 23 37 23 28Z" fill="#ff1820" stroke="#ff1820"/>
+   </g>
+   <text x="515" y="1218" fill="#fff" font-size="21">İTİRAF GÖNDERMEK İÇİN</text>
+   <text x="515" y="1250" fill="#ff1820" font-size="23">BİO'DAKİ LİNKE TIKLA!</text>
+
+   <!-- rules brush -->
+   <path d="M790 1195L1000 1180L978 1270L760 1285Z" fill="url(#red)"/>
+   <g transform="translate(873 1187)">
+     <rect x="0" y="0" width="20" height="27" rx="2" fill="none" stroke="#fff" stroke-width="3"/>
+     <path d="M4 0C4-12 16-12 16 0" fill="none" stroke="#fff" stroke-width="3"/>
+   </g>
+   <text x="885" y="1225" text-anchor="middle" fill="#fff" font-size="18">KURALLARIMIZI</text>
+   <text x="885" y="1251" text-anchor="middle" fill="#fff" font-size="18">OKUMAYI UNUTMA!</text>
  </g>
- <text x="540" y="1360" text-anchor="middle" fill="#a6a6a6" font-family="Arial,sans-serif" font-size="19" letter-spacing="9">İTİRAFINI GÖNDER,</text>
- <text x="540" y="1392" text-anchor="middle" fill="#ff1820" font-family="Arial,sans-serif" font-size="19" font-weight="800" letter-spacing="6">BİZ PAYLAŞALIM.</text>
- <line x1="160" y1="1405" x2="485" y2="1405" stroke="#ff1820" stroke-width="2"/>
- <line x1="595" y1="1405" x2="920" y2="1405" stroke="#ff1820" stroke-width="2"/>
- <text x="540" y="1420" text-anchor="middle" fill="#ff1820" font-size="27">♥</text>
+
+ <!-- BOTTOM BRAND LINE -->
+ <text x="540" y="1350" text-anchor="middle" fill="#aaa" font-family="Arial,sans-serif" font-size="17" letter-spacing="8">İTİRAFINI GÖNDER,</text>
+ <text x="540" y="1381" text-anchor="middle" fill="#ff1820" font-family="Arial,sans-serif" font-size="18" font-weight="900" letter-spacing="7">BİZ PAYLAŞALIM.</text>
+ <line x1="150" y1="1400" x2="475" y2="1400" stroke="#ff1820" stroke-width="2"/>
+ <line x1="605" y1="1400" x2="930" y2="1400" stroke="#ff1820" stroke-width="2"/>
+ <text x="540" y="1417" text-anchor="middle" fill="#ff1820" font-size="28">♥</text>
  </svg>`;
 }
 function render(){
