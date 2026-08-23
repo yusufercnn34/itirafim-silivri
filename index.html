@@ -81,7 +81,7 @@ button:hover{transform:translateY(-1px);border-color:#55585e}button:active{trans
 <section class="previewShell">
   <h2 class="previewTitle">ÖNİZLEME — 1080 × 1440 px</h2>
   <div class="preview"><img id="previewImage" alt="Şablon önizleme"></div>
-  <div class="note">Şablonda yalnızca itiraf numarası, itiraf metni ve paylaşım bilgisi dinamik olarak işlenir.</div>
+  <div class="note">Sabit şablon korunur; yalnızca itiraf numarası, itiraf metni ve paylaşım bilgisi sistem tarafından işlenir.</div>
 </section>
 </main>
 
@@ -113,42 +113,60 @@ const TEMPLATE_DATA = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAASABIAAD/4QCMRX
 // W and H are defined above as the fixed 3:4 export size (1080 × 1440).
 
 function makeSvg(){
-  const num=(numberEl.value||'0001').replace(/\\D/g,'').slice(0,8).padStart(4,'0');
+  const num=(numberEl.value||'0001').replace(/\D/g,'').slice(0,8).padStart(4,'0');
   const raw=textEl.value.trim() || '';
   const named=document.querySelector('input[name="share"]:checked')?.value==='named';
   const cleanName=(usernameEl.value||'').trim().replace(/^@/,'');
   const displayName=named ? ('@'+(cleanName||'kullaniciadi')) : 'ANONİM';
 
-  // The attached image is the fixed template. Only these three dynamic fields are overlaid.
+  // The supplied master image is kept intact. Only the requested dynamic fields are added.
   const quoteLines=wrapText(raw || 'İtiraf metni burada görünecek.', 42);
   const quoteFont=43;
   const quoteGap=58;
   const quoteStart=760-(quoteLines.length-1)*quoteGap/2;
-  let quote='';
-  quoteLines.forEach((line,i)=>{
-    quote += `<text x="543" y="${quoteStart+i*quoteGap}" class="dynamicQuote" font-size="${quoteFont}">${escapeXml(line)}</text>`;
-  });
+
+  // The master already contains the fixed "İTİRAF #" artwork.
+  // Only the number is rendered after the existing #, using the same brush-style family.
+  const numberX=636;
+  const numberY=405;
+
+  // Cover only the fixed identity placeholder area, then draw the identity as one centered SVG group.
+  const metaFont=30;
+  const metaApproxWidth=Math.min(360, Math.max(170, displayName.length*18 + 58));
+  const metaLeft=540 - metaApproxWidth/2;
+  const metaIconSize=48;
+  const metaIconX=metaLeft;
+  const metaIconY=1098;
+  const metaTextX=metaIconX + metaIconSize + 14;
+  const metaTextY=1134;
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
     <defs>
       <style>
         .dynamicQuote{font-family:Arial,sans-serif;font-weight:700;fill:#fff;text-anchor:middle}
-        .dynamicMeta{font-family:Arial,sans-serif;font-weight:400;font-style:italic;fill:#fff;text-anchor:middle}
-        .dynamicNumber{font-family:"Brush Script MT","Segoe Print",cursive;font-weight:700;font-style:italic;fill:#fff;text-anchor:middle;letter-spacing:1px}
+        .dynamicMeta{font-family:Arial,sans-serif;font-weight:400;font-style:italic;fill:#fff}
+        .dynamicNumber{font-family:"Brush Script MT","Segoe Print","URW Chancery L",cursive;font-weight:700;font-style:italic;fill:#fff;letter-spacing:1px}
+        .metaIcon{fill:none;stroke:#ef111b;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
       </style>
     </defs>
+
     <image href="${TEMPLATE_DATA}" x="0" y="0" width="${W}" height="${H}" preserveAspectRatio="none"/>
 
-    <!-- Dynamic confession number; fixed template remains underneath. -->
-    <text x="545" y="405" class="dynamicNumber" font-size="67">İTİRAF #${num}</text>
+    <!-- Only the number is dynamic; the fixed "İTİRAF #" remains part of the master template. -->
+    <text x="${numberX}" y="${numberY}" class="dynamicNumber" font-size="67">${escapeXml(num)}</text>
 
     <!-- Dynamic confession text. -->
-    <text x="543" y="${quoteStart-2}" class="dynamicQuote" font-size="${quoteFont}">${escapeXml(quoteLines[0]||'')}</text>
-    ${quoteLines.slice(1).map((line,i)=>`<text x="543" y="${quoteStart+(i+1)*quoteGap-2}" class="dynamicQuote" font-size="${quoteFont}">${escapeXml(line)}</text>`).join('')}
+    ${quoteLines.map((line,i)=>`<text x="543" y="${quoteStart+i*quoteGap-2}" class="dynamicQuote" font-size="${quoteFont}">${escapeXml(line)}</text>`).join('')}
 
-    <!-- Replace the template's placeholder label with the system-generated identity. -->
-    <rect x="390" y="1100" width="310" height="62" rx="12" fill="#030303" fill-opacity=".92"/>
-    <text x="543" y="1143" class="dynamicMeta" font-size="30">${escapeXml(displayName)}</text>
+    <!-- Hide the template placeholder and replace it with the system-generated identity. -->
+    <rect x="300" y="1085" width="480" height="88" rx="12" fill="#030303" fill-opacity=".96"/>
+
+    <g aria-label="${escapeXml(displayName)}">
+      <circle cx="${metaIconX + metaIconSize/2}" cy="${metaIconY + metaIconSize/2}" r="22" class="metaIcon"/>
+      <circle cx="${metaIconX + metaIconSize/2}" cy="${metaIconY + 17}" r="7" class="metaIcon"/>
+      <path d="M${metaIconX + 10} ${metaIconY + 41}c0-10 7-16 14-16s14 6 14 16" class="metaIcon"/>
+      <text x="${metaTextX}" y="${metaTextY}" class="dynamicMeta" font-size="${metaFont}">${escapeXml(displayName)}</text>
+    </g>
   </svg>`;
 }
 
