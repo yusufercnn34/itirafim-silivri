@@ -36,6 +36,8 @@ button:hover{transform:translateY(-1px);border-color:#55585e}button:active{trans
 .note{margin:12px 0 0;color:#777a80;text-align:center;font-size:13px}
 @media(max-width:900px){.formGrid{grid-template-columns:1fr 1.6fr}.formGrid>div:last-child{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:16px}.userCard{margin-top:0}.formGrid>div:last-child>.card:first-child{height:max-content}}
 @media(max-width:650px){body{padding-top:14px}.brand h1{font-size:27px}.brand p{font-size:13px}.brandLogo{width:58px;height:58px}.formGrid{grid-template-columns:1fr}.formGrid>div:last-child{display:block}.userCard{margin-top:12px}.actions{grid-template-columns:1fr}.textarea{min-height:190px}.previewShell{padding:12px}.previewTitle{font-size:17px}}
+
+@font-face{font-family:"LeviBrush";src:url("https://static.wfonts.com/data/2017/10/16/levi-brush/LEVIBRUSH.woff") format("woff");font-weight:400;font-style:normal;font-display:block}
 </style>
 </head>
 <body>
@@ -98,7 +100,7 @@ function wrap(text,maxChars=34){const words=String(text).trim().split(/\s+/);con
 function wrapText(text,maxWidth,fontSize,maxLines=13){
   const canvas=document.createElement('canvas');
   const ctx=canvas.getContext('2d');
-  ctx.font=`700 ${fontSize}px Arial, sans-serif`;
+  ctx.font=`400 ${fontSize}px LeviBrush, sans-serif`;
 
   const source=String(text||'').replace(/\r/g,'').trim();
   if(!source) return [''];
@@ -213,9 +215,9 @@ function makeSvg(){
   /* -----------------------------------------------------------
      2) NUMARA — "İTİRAF" başlığındaki fırça yazıya uyumlu
      ----------------------------------------------------------- */
-  const numberX=624;
+  const numberX=646;
   const numberY=405;
-  const numberFontSize=55;
+  const numberFontSize=54;
 
   /* -----------------------------------------------------------
      3) PAYLAŞIM BİLGİSİ — noktalı çizginin ALTINDA
@@ -225,9 +227,9 @@ function makeSvg(){
      İkon + isim tek grup olarak tam ortalanır.
      ----------------------------------------------------------- */
   const metaCenterX=543;
-  const metaCenterY=1133;
+  const metaCenterY=1134;
   const metaFont=30;
-  const iconR=23;
+  const iconR=27;
   const iconGap=14;
 
   /*
@@ -235,7 +237,7 @@ function makeSvg(){
     textLength/lengthAdjust mekanizmasıyla grup genişliği belirlenir.
     Böylece ANONİM ve uzun kullanıcı adları merkezden sapmaz.
   */
-  const approxCharWidth=16.5;
+  const approxCharWidth=15.8;
   const textWidth=Math.max(76,displayName.length*approxCharWidth);
   const groupWidth=(iconR*2)+iconGap+textWidth;
   const groupLeft=metaCenterX-groupWidth/2;
@@ -263,9 +265,9 @@ function makeSvg(){
           fill:#fff
         }
         .dynamicNumber{
-          font-family:'LobsterNumber';
+          font-family:'LeviBrush',sans-serif;
           font-weight:400;
-          font-style:italic;
+          font-style:normal;
           fill:#fff
         }
         .metaIcon{
@@ -305,7 +307,7 @@ function makeSvg(){
       yalnızca kendi alanında temizle.
       Noktalı ayırıcı çizginin y=1060 hattına dokunulmaz.
     -->
-    <rect x="292" y="1094" width="502" height="94" rx="8" fill="#030303"/>
+    <rect x="270" y="1088" width="546" height="94" rx="10" fill="#000000"/>
 
     <!-- İkon + ANONİM / @kullanıcı adı: tek merkezli grup -->
     <g aria-label="${escapeXml(displayName)}">
@@ -335,7 +337,7 @@ function update(){
 
 function loadLogo(){
   // The post template is now the supplied image itself.
-  document.getElementById('brandLogo').src=TEMPLATE_DATA;
+  document.getElementById('brandLogo').src=LOGO_SRC;
   return Promise.resolve();
 }
 
