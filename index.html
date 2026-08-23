@@ -120,165 +120,130 @@ function textSvg(lines,x,y,size=44,weight=700){
  return lines.map((l,i)=>`<text x="${x}" y="${y+i*(size*1.28)}" text-anchor="middle" class="quote" font-size="${size}" font-weight="${weight}">${esc(l)}</text>`).join("");
 }
 function buildSVG(){
- const num=(($("number").value||"0001").replace(/\D/g,"")||"1").padStart(4,"0");
- const txt=$("text").value.trim() || "İtiraf metni burada önizlenir. Gerçek gönderide, buraya yazdığın tüm itiraf metni gelecek. ❤️";
- const isUser=document.querySelector('input[name="visibility"]:checked').value==="user";
- const rawName=$("username").value.trim().replace(/^@/,"");
- const name=isUser && rawName ? rawName : "ANONİM";
- const lines=wrapText(txt,34);
- const lineH=58;
- const totalH=lines.length*lineH;
- const startY=735-totalH/2+46;
+ const num=esc(($('number').value||'0001').trim()||'0001');
+ const raw=$('text').value.trim();
+ const isUser=document.querySelector('input[name="visibility"]:checked')?.value==='user';
+ const rawName=$('username').value.trim().replace(/^@+/, '');
+ const name=isUser && rawName ? '@'+rawName : 'ANONİM';
+ const text=raw || 'İtiraf metni burada önizlenir. Gerçek gönderide, buraya yazdığın tüm itiraf metni gelecek. ❤️';
  const logo=LOGO;
-
+ function wrap(txt,max=26){
+   const words=txt.split(/\s+/); const out=[]; let line='';
+   for(const w of words){
+     const t=line?line+' '+w:w;
+     if(t.length>max && line){out.push(line);line=w}else line=t;
+   }
+   if(line)out.push(line); return out.slice(0,8);
+ }
+ const lines=wrap(text,31);
+ const lineH=54;
+ const startY=730-(lines.length-1)*lineH/2;
+ const textSvg=lines.map((l,i)=>`<text x="540" y="${startY+i*lineH}" text-anchor="middle">${esc(l)}</text>`).join('');
  return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1080" height="1440" viewBox="0 0 1080 1440">
  <defs>
-  <radialGradient id="bg" cx="50%" cy="38%" r="78%">
-   <stop offset="0" stop-color="#170205"/><stop offset=".48" stop-color="#060102"/><stop offset="1" stop-color="#000"/>
-  </radialGradient>
-  <linearGradient id="red" x1="0" y1="0" x2="1" y2="0">
-   <stop stop-color="#760006"/><stop offset=".18" stop-color="#e30b13"/><stop offset=".5" stop-color="#ff1a21"/><stop offset=".82" stop-color="#e30b13"/><stop offset="1" stop-color="#700006"/>
-  </linearGradient>
-  <linearGradient id="edge" x1="0" y1="0" x2="0" y2="1">
-   <stop stop-color="#ff4a4f"/><stop offset=".45" stop-color="#ff1018"/><stop offset="1" stop-color="#650005"/>
-  </linearGradient>
-  <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
-   <feGaussianBlur stdDeviation="8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-  </filter>
-  <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
-   <feGaussianBlur stdDeviation="20"/>
-  </filter>
-  <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
-   <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#000" flood-opacity=".9"/>
-  </filter>
-  <pattern id="fineGrid" width="34" height="34" patternUnits="userSpaceOnUse">
-   <path d="M34 0H0V34" fill="none" stroke="#ff1a22" stroke-opacity=".045" stroke-width="1"/>
+  <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#020202"/><stop offset=".55" stop-color="#070707"/><stop offset="1" stop-color="#000"/></linearGradient>
+  <radialGradient id="redCloud"><stop offset="0" stop-color="#ff1018" stop-opacity=".36"/><stop offset=".45" stop-color="#a40008" stop-opacity=".18"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+  <linearGradient id="brush" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#b60008"/><stop offset=".18" stop-color="#ff1720"/><stop offset=".5" stop-color="#e50710"/><stop offset=".82" stop-color="#ff1a22"/><stop offset="1" stop-color="#a90007"/></linearGradient>
+  <linearGradient id="card" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#080909"/><stop offset="1" stop-color="#010101"/></linearGradient>
+  <filter id="glow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="7" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  <filter id="cloud"><feTurbulence type="fractalNoise" baseFrequency=".012" numOctaves="4" seed="21" result="n"/><feColorMatrix in="n" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="r"/><feGaussianBlur stdDeviation="18"/><feComponentTransfer><feFuncA type="table" tableValues="0 .18 .35 .05"/></feComponentTransfer></filter>
+  <filter id="rough"><feTurbulence type="fractalNoise" baseFrequency=".018 .09" numOctaves="2" seed="9" result="noise"/><feDisplacementMap in="SourceGraphic" in2="noise" scale="12"/></filter>
+  <pattern id="cracks" width="210" height="190" patternUnits="userSpaceOnUse">
+   <path d="M8 150L38 125L52 78L85 55L112 72L147 41L192 55M52 78L29 48M85 55L101 20M112 72L119 117L161 144L194 124M147 41L171 17M38 125L18 101" fill="none" stroke="#8d070d" stroke-opacity=".72" stroke-width="2"/>
+   <path d="M8 150L38 125L52 78M112 72L147 41M119 117L161 144" fill="none" stroke="#ff151d" stroke-opacity=".22" stroke-width="1.4"/>
   </pattern>
-  <pattern id="cracks" width="180" height="160" patternUnits="userSpaceOnUse">
-   <path d="M8 120L36 96L42 60L70 42M36 96L18 70M42 60L82 74L112 52L148 60M70 42L90 18M112 52L126 30M82 74L98 106L132 124M148 60L166 38"
-     fill="none" stroke="#8d080e" stroke-opacity=".28" stroke-width="2"/>
-   <path d="M8 120L36 96L42 60M112 52L148 60M82 74L132 124"
-     fill="none" stroke="#ff1b23" stroke-opacity=".12" stroke-width="1"/>
-  </pattern>
-  <clipPath id="quoteClip"><rect x="118" y="500" width="844" height="650" rx="34"/></clipPath>
+  <clipPath id="cardClip"><rect x="112" y="500" width="856" height="650" rx="30"/></clipPath>
  </defs>
-
- <!-- BLACK / RED ATMOSPHERIC BACKGROUND -->
- <rect width="1080" height="1440" fill="#000"/>
  <rect width="1080" height="1440" fill="url(#bg)"/>
- <ellipse cx="540" cy="690" rx="505" ry="575" fill="#5d0007" opacity=".12" filter="url(#softGlow)"/>
- <rect width="1080" height="1440" fill="url(#fineGrid)"/>
- <rect width="1080" height="1440" fill="url(#cracks)" opacity=".85"/>
-
- <!-- SUBTLE RED LIGHT / CRACKLE AROUND THE MAIN CARD -->
- <path d="M45 475C115 430 140 400 185 355M38 820C95 770 116 725 150 690M1040 450C980 420 954 382 920 340M1040 850C990 810 972 760 936 710"
-       fill="none" stroke="#e10b14" stroke-opacity=".22" stroke-width="18" filter="url(#softGlow)"/>
-
- <!-- TOP SLOGANS -->
- <g font-family="Arial,sans-serif" font-style="italic" font-weight="900">
-   <text x="112" y="155" fill="#f5f5f5" font-size="33">İTİRAF ET,</text>
-   <text x="103" y="198" fill="#ff1a22" font-size="35">İÇİN RAHATLASIN.</text>
-   <path d="M102 216C170 232 253 232 326 207" fill="none" stroke="#ff1820" stroke-width="5"/>
-
-   <text x="968" y="155" text-anchor="end" fill="#f5f5f5" font-size="33">KORKMA,</text>
-   <text x="977" y="198" text-anchor="end" fill="#ff1a22" font-size="35">RAHATÇA YAZ.</text>
-   <path d="M755 216C827 232 910 232 978 207" fill="none" stroke="#ff1820" stroke-width="5"/>
+ <!-- Kırmızı atmosfer / çatlak doku -->
+ <ellipse cx="540" cy="630" rx="560" ry="520" fill="url(#redCloud)"/>
+ <ellipse cx="540" cy="620" rx="510" ry="420" fill="#a50009" opacity=".18" filter="url(#cloud)"/>
+ <rect width="1080" height="1440" fill="url(#cracks)" opacity=".48"/>
+ <!-- Silivri hissi veren koyu yan silüetler; içerik alanına taşmaz -->
+ <g fill="#070707" stroke="#300307" stroke-width="4" opacity=".82">
+  <path d="M0 590V410L45 385V335L70 355V300L88 318V282L112 305V348L136 334V590Z"/>
+  <path d="M1080 590V400L1048 382V330L1028 348V294L1008 316V270L988 300V340L958 326V590Z"/>
  </g>
-
- <!-- EXACT EMBEDDED PNG LOGO; NO MODIFICATION -->
- <image href="${logo}" x="360" y="18" width="360" height="360" preserveAspectRatio="xMidYMid meet"/>
-
- <!-- PAINT-STROKE TITLE -->
- <g filter="url(#shadow)">
-   <path d="M108 390
-            L155 377 L214 382 L275 375 L337 383 L399 377 L463 383 L527 375 L592 382 L653 376
-            L717 383 L780 376 L843 382 L902 377 L972 392
-            L949 415 L970 438 L914 450 L852 444 L790 452 L726 445 L664 451 L602 444 L539 452
-            L475 445 L412 451 L348 444 L286 451 L223 444 L163 451 L108 431 L128 412 Z"
-         fill="url(#red)"/>
-   <path d="M140 391C255 409 367 386 480 399C596 412 704 385 825 400C881 407 928 395 954 403"
-         fill="none" stroke="#ff5559" stroke-opacity=".45" stroke-width="4"/>
-   <path d="M143 441C260 425 354 444 468 431C585 418 699 442 820 429C880 423 921 438 950 426"
-         fill="none" stroke="#760006" stroke-opacity=".75" stroke-width="5"/>
+ <g fill="none" stroke="#a40008" opacity=".28">
+  <path d="M18 525L18 382L65 382L65 525M1015 525L1015 380L1060 380L1060 525"/>
+  <circle cx="42" cy="405" r="21"/><circle cx="1038" cy="403" r="21"/>
  </g>
-
- <!-- MEGAPHONE ICON -->
- <g transform="translate(318 399)" stroke="#fff" stroke-width="5" fill="none">
-   <path d="M0 22L35 5L60 10L50 50L25 55L0 38Z"/>
-   <path d="M25 55L19 70L31 73L40 53"/>
-   <path d="M60 10L79 0M61 23L84 20M58 37L78 45"/>
+ <!-- ÜST SLOGANLAR -->
+ <g font-family="'Brush Script MT','Segoe Print','Marker Felt',cursive" font-style="italic" font-weight="800">
+  <text x="105" y="158" fill="#fff" font-size="34">İTİRAF ET,</text>
+  <text x="101" y="203" fill="#ff1820" font-size="35">İÇİN RAHATLASIN.</text>
+  <path d="M99 219C170 233 254 234 326 208" fill="none" stroke="#ff1820" stroke-width="5"/>
+  <text x="975" y="158" text-anchor="end" fill="#fff" font-size="34">KORKMA,</text>
+  <text x="979" y="203" text-anchor="end" fill="#ff1820" font-size="35">RAHATÇA YAZ.</text>
+  <path d="M753 219C826 234 910 234 981 208" fill="none" stroke="#ff1820" stroke-width="5"/>
  </g>
- <text x="574" y="434" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="47" font-weight="900" letter-spacing="2">İTİRAF #${esc(num)}</text>
-
- <!-- MAIN QUOTE CARD -->
+ <!-- LOGO: verilen PNG aynen korunur -->
+ <image href="${logo}" x="350" y="20" width="380" height="380" preserveAspectRatio="xMidYMid meet"/>
+ <!-- KIRMIZI FIRÇA BAŞLIK -->
  <g filter="url(#glow)">
-   <rect x="112" y="478" width="856" height="674" rx="36" fill="#030406" stroke="#ff1b22" stroke-width="3"/>
-   <rect x="118" y="484" width="844" height="662" rx="31" fill="none" stroke="#5e080d" stroke-width="2"/>
+  <path filter="url(#rough)" d="M105 405L133 386L178 391L221 381L270 389L319 381L367 388L417 380L468 389L516 380L565 388L615 380L666 389L716 381L765 389L813 381L861 390L909 383L956 396L975 411L952 425L974 442L927 452L879 446L830 454L781 446L732 454L684 446L635 453L586 446L537 454L488 446L439 453L390 446L341 454L291 446L244 453L197 445L150 451L108 435L130 419Z" fill="url(#brush)"/>
+  <path d="M126 402C245 414 355 394 470 402C587 410 707 393 824 403C884 408 928 400 954 408" fill="none" stroke="#ff7d80" stroke-opacity=".48" stroke-width="4"/>
+  <path d="M127 440C245 427 356 443 473 433C592 421 705 443 821 431C882 425 923 437 954 426" fill="none" stroke="#760006" stroke-opacity=".9" stroke-width="5"/>
  </g>
- <g clip-path="url(#quoteClip)">
-   <circle cx="540" cy="810" r="205" fill="none" stroke="#2d2f32" stroke-opacity=".17" stroke-width="38"/>
-   <circle cx="540" cy="810" r="150" fill="none" stroke="#121417" stroke-opacity=".6" stroke-width="18"/>
+ <!-- Megafon SVG -->
+ <g transform="translate(315 397)" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M0 24L37 5L62 11L52 52L26 57L0 40Z"/><path d="M26 57L19 72L31 75L41 53"/>
+  <path d="M62 11L81 1M64 24L87 20M60 39L81 47"/>
  </g>
-
- <!-- QUOTATION MARKS -->
- <text x="153" y="612" fill="#ff151d" font-family="Georgia,serif" font-size="116" font-weight="700">“</text>
- <text x="906" y="1065" fill="#ff151d" font-family="Georgia,serif" font-size="116" font-weight="700">”</text>
-
- <!-- DYNAMIC CONFESSION TEXT -->
- <g font-family="Arial,sans-serif" fill="#f4f4f4" font-weight="700" font-size="43">
-   ${textSvg(lines,540,startY,43,700)}
+ <text x="590" y="435" text-anchor="middle" fill="#fff" font-family="'Brush Script MT','Segoe Print','Marker Felt',cursive" font-size="49" font-weight="800" letter-spacing="2">İTİRAF #${esc(num)}</text>
+ <!-- ANA İTİRAF KARTI -->
+ <g filter="url(#glow)">
+  <rect x="112" y="500" width="856" height="650" rx="30" fill="url(#card)" stroke="#ff1b23" stroke-width="3"/>
+  <rect x="119" y="507" width="842" height="636" rx="24" fill="none" stroke="#7c0a10" stroke-width="2"/>
  </g>
-
- <!-- DIVIDER -->
- <line x1="154" y1="1004" x2="926" y2="1004" stroke="#e5161d" stroke-width="2" stroke-dasharray="8 10"/>
- <circle cx="540" cy="1004" r="9" fill="#ff1820" filter="url(#glow)"/>
-
- <!-- AUTHOR / VISIBILITY -->
- <g transform="translate(425 1029)">
-   <circle cx="45" cy="45" r="37" fill="none" stroke="#ff1820" stroke-width="3"/>
-   <circle cx="45" cy="34" r="11" fill="none" stroke="#ff1820" stroke-width="3"/>
-   <path d="M24 65Q45 46 66 65" fill="none" stroke="#ff1820" stroke-width="3"/>
-   <text x="92" y="56" fill="#f2f2f2" font-family="Arial,sans-serif" font-size="30" font-style="italic" font-weight="800">${esc(name)}</text>
+ <g clip-path="url(#cardClip)">
+  <rect x="112" y="500" width="856" height="650" fill="url(#cracks)" opacity=".28"/>
+  <circle cx="540" cy="805" r="220" fill="none" stroke="#17191b" stroke-opacity=".65" stroke-width="24"/>
+  <circle cx="540" cy="805" r="172" fill="none" stroke="#0d0f10" stroke-opacity=".72" stroke-width="16"/>
  </g>
-
- <!-- LOWER CTA ROW -->
- <g font-family="Arial,sans-serif" font-style="italic" font-weight="800">
-   <!-- paper plane -->
-   <circle cx="118" cy="1227" r="42" fill="#050505" stroke="#fff" stroke-width="2"/>
-   <path d="M91 1229L145 1207L124 1254L116 1236L91 1229ZM116 1236L145 1207" fill="none" stroke="#ff1820" stroke-width="4"/>
-   <text x="173" y="1218" fill="#fff" font-size="23">İTİRAFINI GÖNDER</text>
-   <text x="173" y="1250" fill="#ff1820" font-size="24">BİZ PAYLAŞALIM.</text>
-
-   <!-- separator -->
-   <line x1="388" y1="1192" x2="388" y2="1266" stroke="#777" stroke-width="2"/>
-
-   <!-- envelope -->
-   <g transform="translate(425 1200)">
-     <rect x="0" y="0" width="66" height="52" rx="4" fill="none" stroke="#fff" stroke-width="3"/>
-     <path d="M3 5L33 30L63 5M3 49L25 28M63 49L41 28" fill="none" stroke="#fff" stroke-width="3"/>
-     <path d="M23 28C28 18 39 18 44 28C44 37 33 43 33 43C33 43 23 37 23 28Z" fill="#ff1820" stroke="#ff1820"/>
-   </g>
-   <text x="515" y="1218" fill="#fff" font-size="21">İTİRAF GÖNDERMEK İÇİN</text>
-   <text x="515" y="1250" fill="#ff1820" font-size="23">BİO'DAKİ LİNKE TIKLA!</text>
-
-   <!-- rules brush -->
-   <path d="M790 1195L1000 1180L978 1270L760 1285Z" fill="url(#red)"/>
-   <g transform="translate(873 1187)">
-     <rect x="0" y="0" width="20" height="27" rx="2" fill="none" stroke="#fff" stroke-width="3"/>
-     <path d="M4 0C4-12 16-12 16 0" fill="none" stroke="#fff" stroke-width="3"/>
-   </g>
-   <text x="885" y="1225" text-anchor="middle" fill="#fff" font-size="18">KURALLARIMIZI</text>
-   <text x="885" y="1251" text-anchor="middle" fill="#fff" font-size="18">OKUMAYI UNUTMA!</text>
+ <!-- Tırnak SVG -->
+ <text x="153" y="636" fill="#ff1720" font-family="Georgia,serif" font-size="118" font-weight="700">“</text>
+ <text x="902" y="1082" fill="#ff1720" font-family="Georgia,serif" font-size="118" font-weight="700">”</text>
+ <g font-family="Arial,sans-serif" fill="#f4f4f4" font-size="43" font-weight="700">${textSvg}</g>
+ <line x1="154" y1="1009" x2="926" y2="1009" stroke="#e5161d" stroke-width="2" stroke-dasharray="8 10"/>
+ <circle cx="540" cy="1009" r="9" fill="#ff1820" filter="url(#glow)"/>
+ <!-- Kullanıcı SVG ikonu -->
+ <g transform="translate(418 1031)" fill="none" stroke="#ff1820" stroke-width="3">
+  <circle cx="54" cy="48" r="38"/><circle cx="54" cy="37" r="11"/><path d="M32 69Q54 49 76 69"/>
+  <text x="103" y="59" fill="#f4f4f4" stroke="none" font-family="'Brush Script MT','Segoe Print','Marker Felt',cursive" font-size="31" font-style="italic" font-weight="800">${esc(name)}</text>
  </g>
-
- <!-- BOTTOM BRAND LINE -->
- <text x="540" y="1350" text-anchor="middle" fill="#aaa" font-family="Arial,sans-serif" font-size="17" letter-spacing="8">İTİRAFINI GÖNDER,</text>
- <text x="540" y="1381" text-anchor="middle" fill="#ff1820" font-family="Arial,sans-serif" font-size="18" font-weight="900" letter-spacing="7">BİZ PAYLAŞALIM.</text>
- <line x1="150" y1="1400" x2="475" y2="1400" stroke="#ff1820" stroke-width="2"/>
- <line x1="605" y1="1400" x2="930" y2="1400" stroke="#ff1820" stroke-width="2"/>
- <text x="540" y="1417" text-anchor="middle" fill="#ff1820" font-size="28">♥</text>
+ <!-- ALT ÇAĞRI ALANI -->
+ <g font-family="'Brush Script MT','Segoe Print','Marker Felt',cursive" font-style="italic" font-weight="800">
+  <!-- Telegram SVG -->
+  <circle cx="118" cy="1220" r="43" fill="#050505" stroke="#fff" stroke-width="2"/>
+  <path d="M91 1222L146 1199L124 1248L116 1229L91 1222ZM116 1229L146 1199" fill="none" stroke="#ff1820" stroke-width="4" stroke-linejoin="round"/>
+  <text x="173" y="1212" fill="#fff" font-size="24">İTİRAFINI GÖNDER</text>
+  <text x="173" y="1245" fill="#ff1820" font-size="25">BİZ PAYLAŞALIM.</text>
+  <line x1="388" y1="1188" x2="388" y2="1260" stroke="#777" stroke-width="2"/>
+  <!-- Zarf SVG -->
+  <g transform="translate(424 1194)" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round">
+   <rect x="0" y="0" width="68" height="53" rx="4"/><path d="M3 5L34 31L65 5M3 50L25 28M65 50L43 28"/>
+   <path d="M23 29C27 20 40 20 45 29C45 37 34 43 34 43C34 43 23 37 23 29Z" fill="#ff1820" stroke="#ff1820"/>
+  </g>
+  <text x="515" y="1212" fill="#fff" font-size="21">İTİRAF GÖNDERMEK İÇİN</text>
+  <text x="515" y="1245" fill="#ff1820" font-size="23">BİO'DAKİ LİNKE TIKLA!</text>
+  <!-- Kurallar boya etiketi + kilit SVG -->
+  <path filter="url(#rough)" d="M770 1196L1003 1182L980 1268L754 1283Z" fill="url(#brush)"/>
+  <g transform="translate(870 1186)" fill="none" stroke="#fff" stroke-width="3">
+   <rect x="0" y="8" width="21" height="27" rx="2"/><path d="M4 8C4-4 17-4 17 8"/>
+  </g>
+  <text x="884" y="1222" text-anchor="middle" fill="#fff" font-size="18">KURALLARIMIZI</text>
+  <text x="884" y="1249" text-anchor="middle" fill="#fff" font-size="18">OKUMAYI UNUTMA!</text>
+ </g>
+ <!-- Alt imza çizgisi -->
+ <text x="540" y="1340" text-anchor="middle" fill="#9b9b9b" font-family="'Brush Script MT','Segoe Print','Marker Felt',cursive" font-size="17" letter-spacing="8">İ T İ R A F I N I  G Ö N D E R ,</text>
+ <text x="540" y="1370" text-anchor="middle" fill="#ff1820" font-family="'Brush Script MT','Segoe Print','Marker Felt',cursive" font-size="18" font-weight="800" letter-spacing="7">BİZ PAYLAŞALIM.</text>
+ <line x1="145" y1="1390" x2="472" y2="1390" stroke="#ff1820" stroke-width="2"/>
+ <line x1="608" y1="1390" x2="935" y2="1390" stroke="#ff1820" stroke-width="2"/>
+ <text x="540" y="1407" text-anchor="middle" fill="#ff1820" font-size="30">♥</text>
  </svg>`;
 }
+
 function render(){
  $("count").textContent=$("text").value.length;
  $("preview").innerHTML=buildSVG();
