@@ -31,7 +31,7 @@ input:focus,textarea:focus{border-color:#ff2028;box-shadow:0 0 0 2px #ff10181c}
 .share{padding:18px}
 .radio{display:flex;align-items:center;gap:10px;margin:13px 0;font-size:16px;cursor:pointer}
 .radio input{width:20px;height:20px;margin:0;accent-color:var(--red)}
-.username{margin-top:18px;padding-top:17px;border-top:1px solid #282a2d}
+.username{display:none;margin-top:18px;padding-top:17px;border-top:1px solid #282a2d}
 .username.disabled{opacity:.42}
 .username input{height:46px;font-size:16px}
 .actions{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px}
@@ -199,7 +199,7 @@ document.querySelectorAll('input[name="visibility"]').forEach(r=>r.addEventListe
  $("username").disabled=!isUserMode;
  $("username").required=isUserMode;
  $("usernameBox").classList.toggle("disabled",!isUserMode);
- $("usernameBox").style.display=isUserMode ? "" : "none";
+ $("usernameBox").style.display=isUserMode ? "block" : "none";
 
  // Anonim seçiliyken kullanıcı adı alanı tamamen gizlenir ve değeri temizlenir.
  if(!isUserMode){
@@ -215,7 +215,7 @@ const initialUserMode=document.querySelector('input[name="visibility"]:checked')
 $("username").disabled=!initialUserMode;
 $("username").required=initialUserMode;
 $("usernameBox").classList.toggle("disabled",!initialUserMode);
-$("usernameBox").style.display=initialUserMode ? "" : "none";
+$("usernameBox").style.display=initialUserMode ? "block" : "none";
 if(!initialUserMode) $("username").value="";
 
 ["number","text","username"].forEach(id=>$(id).addEventListener("input",render));
