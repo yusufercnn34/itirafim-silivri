@@ -4,28 +4,24 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#050505">
-<title>İtirafım Silivri — Sabit Post Şablonu</title>
+<title>İtirafım Silivri — Boş Post Şablonu</title>
 <style>
-:root{--bg:#050505;--panel:#0c0d0f;--line:#2b2d31;--red:#f10d18;--white:#f7f7f7;--muted:#9b9da2}
+:root{--bg:#050505;--panel:#0c0d0f;--line:#2b2d31;--red:#f10d18;--white:#f7f7f7}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;min-height:100%;background:#050505;color:var(--white);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
 body{padding:24px 0 48px}
 main{width:min(1180px,calc(100% - 28px));margin:auto}
-.brand{display:flex;align-items:center;justify-content:center;gap:14px;margin:0 0 24px}
+.brand{display:flex;align-items:center;justify-content:center;margin:0 0 24px}
 .brand h1{margin:0;font-size:34px;line-height:1;font-weight:800;letter-spacing:-1.2px}
 .brand h1 span{color:var(--red)}
 .brand p{margin:7px 0 0;color:#8e9095;font-size:16px}
-.card{background:linear-gradient(180deg,#0e0f11,#0a0b0d);border:1px solid #292b30;border-radius:12px;padding:18px;box-shadow:0 10px 30px rgba(0,0,0,.2)}
-.previewShell{border:1px solid #2a2c30;border-radius:14px;padding:18px;background:#090a0b}
+.previewShell{background:linear-gradient(180deg,#0e0f11,#0a0b0d);border:1px solid #292b30;border-radius:12px;padding:18px;box-shadow:0 10px 30px rgba(0,0,0,.2)}
 .previewTitle{font-size:20px;font-weight:800;color:#f10d18;margin:0 0 14px}
 .preview{width:100%;overflow:hidden;border-radius:9px;background:#000}
 .preview img{display:block;width:100%;height:auto}
 .note{margin:12px 0 0;color:#777a80;text-align:center;font-size:13px}
-.actions{display:grid;grid-template-columns:1fr;gap:16px;margin-top:16px}
-button{height:62px;border-radius:10px;border:1px solid #34363b;background:#0d0e10;color:#fff;font:700 18px inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:.18s}
-button:hover{transform:translateY(-1px);border-color:#55585e}
-button:active{transform:translateY(0)}
-.primary{border-color:#ff1a24;background:linear-gradient(180deg,#ff171f,#e60812);box-shadow:0 10px 28px rgba(241,13,24,.18)}
+.actions{margin-top:16px}
+button{width:100%;height:62px;border-radius:10px;border:1px solid #ff1a24;background:linear-gradient(180deg,#ff171f,#e60812);color:#fff;font:700 18px inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 10px 28px rgba(241,13,24,.18)}
 .btnIcon{width:23px;height:23px;display:block}
 .btnIcon svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .status{margin:18px 0 12px;text-align:center;color:#96989d;font-size:15px}
@@ -42,23 +38,33 @@ button:active{transform:translateY(0)}
 <body>
 <main>
 <header class="brand">
-  <div><h1>itirafım <span>Silivri</span></h1><p>Sabit post şablonu</p></div>
+  <div>
+    <h1>itirafım <span>Silivri</span></h1>
+    <p>Boş post şablonu</p>
+  </div>
 </header>
 
 <section class="previewShell">
   <h2 class="previewTitle">ÖNİZLEME — 1080 × 1440 px</h2>
-  <div class="preview"><img id="previewImage" alt="İtirafım Silivri sabit post şablonu"></div>
-  <div class="note">Şablon sabittir; itiraf metni, anonim / kullanıcı adı bilgisi ve itiraf numarası eklenmez.</div>
+  <div class="preview">
+    <img id="previewImage" alt="İtirafım Silivri boş post şablonu">
+  </div>
+  <div class="note">İtiraf metni, anonim / kullanıcı adı ve itiraf numarası eklenmez.</div>
 </section>
 
 <div class="actions">
-  <button id="download" class="primary">
+  <button id="download">
     <span class="btnIcon">
-      <svg viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M4 20h16"/></svg>
+      <svg viewBox="0 0 24 24">
+        <path d="M12 3v12"/>
+        <path d="m7 10 5 5 5-5"/>
+        <path d="M4 20h16"/>
+      </svg>
     </span>
     PNG Oluştur / Paylaş
   </button>
 </div>
+
 <div id="status" class="status">PNG çıktısı 1080 × 1440 px olarak oluşturulur.</div>
 </main>
 
@@ -97,7 +103,7 @@ async function exportPng(){
     URL.revokeObjectURL(url);
 
     const png = await new Promise(r => c.toBlob(r, 'image/png', 1));
-    const file = new File([png], 'itirafim-silivri-sabit-post.png', {type:'image/png'});
+    const file = new File([png], 'itirafim-silivri-bos-post.png', {type:'image/png'});
 
     if(navigator.share && navigator.canShare?.({files:[file]})){
       try {
