@@ -734,6 +734,11 @@ document.getElementById('downloadBtn').addEventListener('click', async () => {
     await document.fonts.ready;
     render();
 
+    // Preview is scaled for the screen. Export must always capture the
+    // original 1122x1402 post itself, not the scaled preview.
+    const previousTransform = post.style.transform;
+    post.style.transform = 'none';
+
     const exportCanvas = await html2canvas(post, {
       width: 1122,
       height: 1402,
@@ -742,6 +747,8 @@ document.getElementById('downloadBtn').addEventListener('click', async () => {
       backgroundColor: null,
       logging: false
     });
+
+    post.style.transform = previousTransform;
 
     const safeNo = (numberInput.value.trim() || 'itiraf').replace(/[^a-zA-Z0-9_-]/g, '');
     const fileName = `itiraf-silivri-${safeNo || 'post'}.jpg`;
