@@ -577,7 +577,7 @@
         </div>
 
         <div class="actions">
-          <button class="primary" id="downloadBtn">PNG OLARAK İNDİR</button>
+          <button class="primary" id="downloadBtn">GÖRSEL OLARAK İNDİR</button>
           <button class="secondary" id="resetBtn">TEMİZLE</button>
         </div>
       </div>
@@ -743,13 +743,33 @@ document.getElementById('downloadBtn').addEventListener('click', async () => {
       logging: false
     });
 
-    const link = document.createElement('a');
     const safeNo = (numberInput.value.trim() || 'itiraf').replace(/[^a-zA-Z0-9_-]/g, '');
-    link.download = `itiraf-silivri-${safeNo || 'post'}.png`;
-    link.href = exportCanvas.toDataURL('image/png');
-    link.click();
+    const fileName = `itiraf-silivri-${safeNo || 'post'}.jpg`;
+
+    const blob = await new Promise((resolve) => {
+      exportCanvas.toBlob(resolve, 'image/jpeg', 0.95);
+    });
+
+    if (!blob) throw new Error('Görsel oluşturulamadı.');
+
+    const file = new File([blob], fileName, { type: 'image/jpeg' });
+
+    if (/iPad|iPhone|iPod/.test(navigator.userAgent) &&
+        navigator.share && navigator.canShare &&
+        navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: 'İtirafım Silivri' });
+    } else {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.download = fileName;
+      link.href = url;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
   } catch (error) {
-    alert('PNG oluşturulamadı. Sayfayı yenileyip tekrar deneyin.');
+    alert('Görsel oluşturulamadı. Sayfayı yenileyip tekrar deneyin.');
     console.error(error);
   } finally {
     btn.textContent = old;
